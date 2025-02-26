@@ -63,16 +63,24 @@ typedef struct daemon_status_file {
         long line;
         const char *filename;
         const char *function;
+        const char *errno_str;
         const char *stack_trace;
         const char *message;
     } fatal;
+
+    struct {
+        XXH64_hash_t hash;
+        usec_t timestamp_ut;
+        size_t restarts;
+    } dedup;
 } DAEMON_STATUS_FILE;
 
 // loads the last status saved
 DAEMON_STATUS_FILE daemon_status_file_load(void);
 
 // saves the current status
-void daemon_status_file_save(DAEMON_STATUS status);
+void daemon_status_file_update_status(DAEMON_STATUS status);
+void daemon_status_file_exit_reason_save(EXIT_REASON reason);
 
 // check for a crash
 void daemon_status_file_check_crash(void);
@@ -81,6 +89,6 @@ bool daemon_status_file_has_last_crashed(void);
 bool daemon_status_file_was_incomplete_shutdown(void);
 void daemon_status_file_startup_step(const char *step);
 
-void daemon_status_file_register_fatal(const char *filename, const char *function, const char *message, const char *stack_trace, long line);
+void daemon_status_file_register_fatal(const char *filename, const char *function, const char *message, const char *errno_str, const char *stack_trace, long line);
 
 #endif //NETDATA_DAEMON_STATUS_FILE_H
